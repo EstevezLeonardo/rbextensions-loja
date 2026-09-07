@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { buscarProdutoPorCodigo } from "@/lib/api";
 import { GaleriaDeFotos } from "@/components/GaleriaDeFotos";
+import { IconeCarrinho } from "@/components/IconeCarrinho";
+import { BotaoAdicionarAoCarrinho } from "@/components/BotaoAdicionarAoCarrinho";
 
 interface ProdutoPageProps {
   params: Promise<{ codigo: string }>;
@@ -24,10 +26,11 @@ export default async function ProdutoPage({ params }: ProdutoPageProps) {
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50">
-      <header className="border-b border-zinc-200 bg-white px-6 py-4">
+      <header className="flex items-center justify-between border-b border-zinc-200 bg-white px-6 py-4">
         <Link href="/" className="text-sm font-medium text-zinc-500 hover:text-zinc-800">
           ← Voltar ao catálogo
         </Link>
+        <IconeCarrinho />
       </header>
 
       <main className="flex-1 px-6 py-8">
@@ -59,13 +62,15 @@ export default async function ProdutoPage({ params }: ProdutoPageProps) {
               {produto.disponivel ? "Disponível em estoque" : "Esgotado"}
             </p>
 
-            <button
-              type="button"
-              disabled={!produto.disponivel}
-              className="mt-6 w-full rounded-lg bg-zinc-900 px-6 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-zinc-300"
-            >
-              {produto.disponivel ? "Adicionar ao carrinho" : "Indisponível"}
-            </button>
+            <BotaoAdicionarAoCarrinho
+              produto={{
+                codigo: produto.codigo,
+                nome: produto.nome,
+                preco: produto.preco,
+                foto: produto.fotos[0] ?? null,
+                disponivel: produto.disponivel,
+              }}
+            />
           </div>
         </div>
       </main>

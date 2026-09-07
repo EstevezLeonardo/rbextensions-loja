@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { buscarFiltros, buscarProdutos, type OpcaoDeFiltro } from "@/lib/api";
+import { IconeCarrinho } from "@/components/IconeCarrinho";
 
 interface FiltrosAtuais {
   categoria?: string;
@@ -39,8 +40,9 @@ export default async function Home({ searchParams }: HomeProps) {
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50">
-      <header className="border-b border-zinc-200 bg-white px-6 py-4">
+      <header className="flex items-center justify-between border-b border-zinc-200 bg-white px-6 py-4">
         <h1 className="text-lg font-semibold text-zinc-900">Royal Brazilian Extensions</h1>
+        <IconeCarrinho />
       </header>
 
       <main className="flex-1 px-6 py-8">
