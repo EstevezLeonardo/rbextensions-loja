@@ -10,7 +10,7 @@ export function IconeCarrinho() {
   return (
     <Link
       href="/carrinho"
-      className="relative inline-flex items-center gap-2 rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100"
+      className="relative inline-flex items-center gap-2 rounded-lg border border-dourado/40 px-3 py-1.5 text-sm font-medium text-marrom hover:bg-dourado/10"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -29,7 +29,7 @@ export function IconeCarrinho() {
       </svg>
       Carrinho
       {totalItens > 0 && (
-        <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-zinc-900 text-xs font-semibold text-white">
+        <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-dourado text-xs font-semibold text-white">
           {totalItens}
         </span>
       )}

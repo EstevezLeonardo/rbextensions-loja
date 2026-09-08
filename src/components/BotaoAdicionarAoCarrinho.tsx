@@ -45,7 +45,7 @@ export function BotaoAdicionarAoCarrinho({ produto }: BotaoAdicionarAoCarrinhoPr
     <button
       type="button"
       onClick={handleClick}
-      className="mt-6 w-full rounded-lg bg-zinc-900 px-6 py-3 text-sm font-semibold text-white hover:bg-zinc-800"
+      className="mt-6 w-full rounded-lg bg-dourado px-6 py-3 text-sm font-semibold text-white hover:bg-marrom"
     >
       {adicionado ? "Adicionado ✓" : "Adicionar ao carrinho"}
     </button>

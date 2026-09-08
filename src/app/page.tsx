@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { buscarFiltros, buscarProdutos, type OpcaoDeFiltro } from "@/lib/api";
-import { IconeCarrinho } from "@/components/IconeCarrinho";
 
 interface FiltrosAtuais {
   categoria?: string;
@@ -14,11 +13,10 @@ interface HomeProps {
 }
 
 /**
- * Home provisória: catálogo real (api/produtos.php) + seção "Critérios
- * de Escolha" (api/filtros.php, com contagem por opção) inspirada no
- * site de referência do ramo. Filtros vivem na URL (?categoria=&tom=&
- * comprimento=), sem JS de cliente — cada opção é só um link. Estilo
- * neutro de propósito, ainda a trocar pelo layout de referência.
+ * Home: catálogo real (api/produtos.php) + seção "Critérios de Escolha"
+ * (api/filtros.php, com contagem por opção) inspirada no site de
+ * referência do ramo. Filtros vivem na URL (?categoria=&tom=&
+ * comprimento=), sem JS de cliente — cada opção é só um link.
  */
 export default async function Home({ searchParams }: HomeProps) {
   const filtrosAtuais = await searchParams;
@@ -40,11 +38,6 @@ export default async function Home({ searchParams }: HomeProps) {
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50">
-      <header className="flex items-center justify-between border-b border-zinc-200 bg-white px-6 py-4">
-        <h1 className="text-lg font-semibold text-zinc-900">Royal Brazilian Extensions</h1>
-        <IconeCarrinho />
-      </header>
-
       <main className="flex-1 px-6 py-8">
         <section aria-labelledby="criterios-titulo" className="mb-8">
           <div className="mb-3 flex items-center justify-between">
@@ -52,7 +45,7 @@ export default async function Home({ searchParams }: HomeProps) {
               Critérios de Escolha
             </h2>
             {algumFiltroAtivo && (
-              <Link href="/" className="text-sm font-medium text-zinc-500 underline hover:text-zinc-800">
+              <Link href="/" className="text-sm font-medium text-dourado underline hover:text-marrom">
                 Limpar filtros
               </Link>
             )}
@@ -119,7 +112,7 @@ export default async function Home({ searchParams }: HomeProps) {
                       <p className="mt-1 text-sm text-zinc-600">{produto.descricao}</p>
                     )}
                     <div className="mt-3 flex items-center justify-between">
-                      <span className="text-lg font-semibold text-zinc-900">
+                      <span className="text-lg font-semibold text-marrom">
                         {produto.preco.toLocaleString("pt-BR", {
                           style: "currency",
                           currency: "BRL",
@@ -148,8 +141,8 @@ export default async function Home({ searchParams }: HomeProps) {
                     href={construirHref(filtrosAtuais, "pagina", String(numeroDaPagina))}
                     className={
                       numeroDaPagina === paginaAtual
-                        ? "rounded bg-zinc-900 px-3 py-1 text-sm font-medium text-white"
-                        : "rounded border border-zinc-300 px-3 py-1 text-sm font-medium text-zinc-700 hover:bg-zinc-100"
+                        ? "rounded bg-dourado px-3 py-1 text-sm font-medium text-white"
+                        : "rounded border border-dourado/30 px-3 py-1 text-sm font-medium text-marrom hover:bg-dourado/10"
                     }
                   >
                     {numeroDaPagina}
@@ -197,15 +190,15 @@ function GrupoDeFiltro({
                 href={construirHref(filtrosAtuais, chave, valor)}
                 className={
                   ativo
-                    ? "flex items-center justify-between rounded bg-zinc-900 px-2 py-1 text-sm font-medium text-white"
-                    : "flex items-center justify-between rounded px-2 py-1 text-sm text-zinc-700 hover:bg-zinc-100"
+                    ? "flex items-center justify-between rounded bg-dourado px-2 py-1 text-sm font-medium text-white"
+                    : "flex items-center justify-between rounded px-2 py-1 text-sm text-zinc-700 hover:bg-dourado/10"
                 }
               >
                 <span>
                   {valor}
                   {sufixo}
                 </span>
-                <span className={ativo ? "text-zinc-300" : "text-zinc-400"}>{opcao.total}</span>
+                <span className={ativo ? "text-white/80" : "text-zinc-400"}>{opcao.total}</span>
               </Link>
             </li>
           );

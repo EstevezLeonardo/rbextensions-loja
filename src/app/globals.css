@@ -3,11 +3,21 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Identidade visual da marca — mesma paleta dourado/marrom do
+     dashboard (dashboard/public/assets/css/style.css), pra loja e
+     painel administrativo parecerem do mesmo negócio. */
+  --dourado: #a37407;
+  --dourado-claro: #af8a34;
+  --marrom: #5f4404;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-dourado: var(--dourado);
+  --color-dourado-claro: var(--dourado-claro);
+  --color-marrom: var(--marrom);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

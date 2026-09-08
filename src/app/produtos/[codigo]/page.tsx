@@ -2,7 +2,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { buscarProdutoPorCodigo } from "@/lib/api";
 import { GaleriaDeFotos } from "@/components/GaleriaDeFotos";
-import { IconeCarrinho } from "@/components/IconeCarrinho";
 import { BotaoAdicionarAoCarrinho } from "@/components/BotaoAdicionarAoCarrinho";
 
 interface ProdutoPageProps {
@@ -26,15 +25,14 @@ export default async function ProdutoPage({ params }: ProdutoPageProps) {
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50">
-      <header className="flex items-center justify-between border-b border-zinc-200 bg-white px-6 py-4">
-        <Link href="/" className="text-sm font-medium text-zinc-500 hover:text-zinc-800">
-          ← Voltar ao catálogo
-        </Link>
-        <IconeCarrinho />
-      </header>
-
       <main className="flex-1 px-6 py-8">
-        <div className="mx-auto grid max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">
+        <div className="mx-auto max-w-4xl">
+          <Link href="/" className="text-sm font-medium text-zinc-500 hover:text-marrom">
+            ← Voltar ao catálogo
+          </Link>
+        </div>
+
+        <div className="mx-auto mt-4 grid max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">
           <GaleriaDeFotos fotos={produto.fotos} nome={produto.nome} />
 
           <div>
@@ -48,7 +46,7 @@ export default async function ProdutoPage({ params }: ProdutoPageProps) {
 
             {produto.descricao && <p className="mt-4 text-zinc-700">{produto.descricao}</p>}
 
-            <p className="mt-6 text-3xl font-semibold text-zinc-900">
+            <p className="mt-6 text-3xl font-semibold text-marrom">
               {produto.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
             </p>
 

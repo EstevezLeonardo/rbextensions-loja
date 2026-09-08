@@ -67,15 +67,13 @@ function CarrinhoConteudo() {
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50">
-      <header className="border-b border-zinc-200 bg-white px-6 py-4">
-        <Link href="/" className="text-sm font-medium text-zinc-500 hover:text-zinc-800">
-          ← Voltar ao catálogo
-        </Link>
-      </header>
-
       <main className="flex-1 px-6 py-8">
         <div className="mx-auto max-w-4xl">
-          <h1 className="text-2xl font-semibold text-zinc-900">Seu carrinho</h1>
+          <Link href="/" className="text-sm font-medium text-zinc-500 hover:text-marrom">
+            ← Voltar ao catálogo
+          </Link>
+
+          <h1 className="mt-4 text-2xl font-semibold text-zinc-900">Seu carrinho</h1>
 
           {pagamentoCancelado && (
             <p className="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
@@ -86,7 +84,7 @@ function CarrinhoConteudo() {
           {itens.length === 0 ? (
             <p className="mt-4 text-zinc-500">
               Seu carrinho está vazio.{" "}
-              <Link href="/" className="font-medium text-zinc-800 underline">
+              <Link href="/" className="font-medium text-dourado underline">
                 Ver catálogo
               </Link>
             </p>
@@ -146,7 +144,7 @@ function CarrinhoConteudo() {
               </ul>
 
               <div className="h-fit rounded-lg border border-zinc-200 bg-white p-4">
-                <div className="flex items-center justify-between text-lg font-semibold text-zinc-900">
+                <div className="flex items-center justify-between text-lg font-semibold text-marrom">
                   <span>Total</span>
                   <span>{totalValor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</span>
                 </div>
@@ -197,7 +195,7 @@ function CarrinhoConteudo() {
                   <button
                     type="submit"
                     disabled={enviando}
-                    className="mt-2 w-full rounded-lg bg-zinc-900 px-6 py-3 text-sm font-semibold text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-300"
+                    className="mt-2 w-full rounded-lg bg-dourado px-6 py-3 text-sm font-semibold text-white hover:bg-marrom disabled:cursor-not-allowed disabled:bg-zinc-300"
                   >
                     {enviando ? "Redirecionando para o pagamento..." : "Pagar com cartão"}
                   </button>

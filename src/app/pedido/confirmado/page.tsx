@@ -94,7 +94,7 @@ function PedidoConfirmadoConteudo() {
         <h1 className="text-2xl font-semibold text-zinc-900">Sessão de pagamento não encontrada</h1>
         <Link
           href="/"
-          className="mt-6 rounded-lg bg-zinc-900 px-6 py-3 text-sm font-semibold text-white hover:bg-zinc-800"
+          className="mt-6 rounded-lg bg-dourado px-6 py-3 text-sm font-semibold text-white hover:bg-marrom"
         >
           Voltar ao catálogo
         </Link>
@@ -132,7 +132,7 @@ function PedidoConfirmadoConteudo() {
 
       <Link
         href="/"
-        className="mt-6 rounded-lg bg-zinc-900 px-6 py-3 text-sm font-semibold text-white hover:bg-zinc-800"
+        className="mt-6 rounded-lg bg-dourado px-6 py-3 text-sm font-semibold text-white hover:bg-marrom"
       >
         Voltar ao catálogo
       </Link>
