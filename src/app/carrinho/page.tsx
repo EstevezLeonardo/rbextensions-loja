@@ -1,34 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useState, type FormEvent } from "react";
 import { useCarrinho } from "@/contexts/CarrinhoContext";
 
 const API_BASE_URL_PUBLICO = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost/rbextensions/api";
 
-type FormaPagamento = "debito" | "pix" | "credito";
-
-interface PedidoConcluido {
-  id: number;
-  valorTotal: number;
-}
-
 /**
- * Página de carrinho + checkout. Client Component inteira (quantidade,
- * formulário e o POST em api/pedido.php dependem de interatividade) —
- * chama a API pública diretamente do navegador via
- * NEXT_PUBLIC_API_BASE_URL, sem passar pelo servidor Next.js.
+ * Página de carrinho + checkout. Client Component inteira (quantidade
+ * e o formulário dependem de interatividade) — ao fechar o pedido,
+ * chama api/checkout-stripe-criar.php (que só valida o carrinho e abre
+ * uma sessão do Stripe Checkout, sem gravar nada ainda) e redireciona
+ * o navegador pra página de pagamento do próprio Stripe. O carrinho só
+ * é limpo depois, na página de confirmação (/pedido/confirmado), pra
+ * não sumir com os itens se o cliente cancelar o pagamento e voltar.
  */
 export default function CarrinhoPage() {
-  const { itens, atualizarQuantidade, removerItem, limparCarrinho, totalValor } = useCarrinho();
+  return (
+    <Suspense>
+      <CarrinhoConteudo />
+    </Suspense>
+  );
+}
+
+function CarrinhoConteudo() {
+  const { itens, atualizarQuantidade, removerItem, totalValor } = useCarrinho();
+  const searchParams = useSearchParams();
+  const pagamentoCancelado = searchParams.get("pagamento") === "cancelado";
 
   const [nome, setNome] = useState("");
   const [sobrenome, setSobrenome] = useState("");
   const [email, setEmail] = useState("");
-  const [formaPagamento, setFormaPagamento] = useState<FormaPagamento>("pix");
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
-  const [pedidoConcluido, setPedidoConcluido] = useState<PedidoConcluido | null>(null);
 
   async function finalizarPedido(evento: FormEvent) {
     evento.preventDefault();
@@ -36,12 +41,11 @@ export default function CarrinhoPage() {
     setEnviando(true);
 
     try {
-      const resposta = await fetch(`${API_BASE_URL_PUBLICO}/pedido.php`, {
+      const resposta = await fetch(`${API_BASE_URL_PUBLICO}/checkout-stripe-criar.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           cliente: { nome, sobrenome, email },
-          formaPagamento,
           itens: itens.map((item) => ({ codigo: item.codigo, quantidade: item.quantidade })),
         }),
       });
@@ -49,38 +53,16 @@ export default function CarrinhoPage() {
       const dados = await resposta.json();
 
       if (!resposta.ok) {
-        setErro(dados.erro ?? "Não foi possível concluir o pedido agora.");
+        setErro(dados.erro ?? "Não foi possível iniciar o pagamento agora.");
+        setEnviando(false);
         return;
       }
 
-      setPedidoConcluido(dados);
-      limparCarrinho();
+      window.location.href = dados.url;
     } catch {
-      setErro("Não foi possível concluir o pedido agora. Verifique sua conexão e tente novamente.");
-    } finally {
+      setErro("Não foi possível iniciar o pagamento agora. Verifique sua conexão e tente novamente.");
       setEnviando(false);
     }
-  }
-
-  if (pedidoConcluido) {
-    return (
-      <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 px-6 py-12 text-center">
-        <h1 className="text-2xl font-semibold text-zinc-900">Pedido recebido!</h1>
-        <p className="mt-2 text-zinc-600">
-          Pedido #{pedidoConcluido.id} —{" "}
-          {pedidoConcluido.valorTotal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-        </p>
-        <p className="mt-1 text-sm text-zinc-500">
-          Em breve entraremos em contato para combinar o pagamento e a entrega.
-        </p>
-        <Link
-          href="/"
-          className="mt-6 rounded-lg bg-zinc-900 px-6 py-3 text-sm font-semibold text-white hover:bg-zinc-800"
-        >
-          Voltar ao catálogo
-        </Link>
-      </div>
-    );
   }
 
   return (
@@ -94,6 +76,12 @@ export default function CarrinhoPage() {
       <main className="flex-1 px-6 py-8">
         <div className="mx-auto max-w-4xl">
           <h1 className="text-2xl font-semibold text-zinc-900">Seu carrinho</h1>
+
+          {pagamentoCancelado && (
+            <p className="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              Pagamento cancelado. Seus itens continuam no carrinho — pode tentar novamente quando quiser.
+            </p>
+          )}
 
           {itens.length === 0 ? (
             <p className="mt-4 text-zinc-500">
@@ -204,22 +192,6 @@ export default function CarrinhoPage() {
                     />
                   </div>
 
-                  <div>
-                    <label htmlFor="formaPagamento" className="block text-xs font-medium text-zinc-600">
-                      Forma de pagamento
-                    </label>
-                    <select
-                      id="formaPagamento"
-                      value={formaPagamento}
-                      onChange={(evento) => setFormaPagamento(evento.target.value as FormaPagamento)}
-                      className="mt-1 w-full rounded border border-zinc-300 px-3 py-2 text-sm"
-                    >
-                      <option value="pix">PIX</option>
-                      <option value="debito">Débito</option>
-                      <option value="credito">Crédito</option>
-                    </select>
-                  </div>
-
                   {erro && <p className="text-sm text-red-600">{erro}</p>}
 
                   <button
@@ -227,7 +199,7 @@ export default function CarrinhoPage() {
                     disabled={enviando}
                     className="mt-2 w-full rounded-lg bg-zinc-900 px-6 py-3 text-sm font-semibold text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-300"
                   >
-                    {enviando ? "Enviando..." : "Fechar pedido"}
+                    {enviando ? "Redirecionando para o pagamento..." : "Pagar com cartão"}
                   </button>
                 </form>
               </div>
