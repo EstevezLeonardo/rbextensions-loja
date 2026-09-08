@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useState, type FormEvent } from "react";
+import { Suspense, useEffect, useState, type FormEvent } from "react";
 import { useCarrinho } from "@/contexts/CarrinhoContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const API_BASE_URL_PUBLICO = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost/rbextensions/api";
 
@@ -26,6 +27,7 @@ export default function CarrinhoPage() {
 
 function CarrinhoConteudo() {
   const { itens, atualizarQuantidade, removerItem, totalValor } = useCarrinho();
+  const { cliente } = useAuth();
   const searchParams = useSearchParams();
   const pagamentoCancelado = searchParams.get("pagamento") === "cancelado";
 
@@ -34,6 +36,16 @@ function CarrinhoConteudo() {
   const [email, setEmail] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
+
+  // pré-preenche com os dados do cliente logado (ele ainda pode editar,
+  // caso essa compra seja pra outra pessoa ou queira usar outro e-mail)
+  useEffect(() => {
+    if (cliente) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- cliente vem de um sistema externo assíncrono (AuthContext carregando o localStorage), não de um prop derivado — só preenche campos ainda vazios, uma vez
+      setNome((atual) => atual || cliente.nome);
+      setEmail((atual) => atual || cliente.email);
+    }
+  }, [cliente]);
 
   async function finalizarPedido(evento: FormEvent) {
     evento.preventDefault();
