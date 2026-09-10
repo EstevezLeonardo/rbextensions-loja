@@ -10,6 +10,7 @@
   --dourado: #a37407;
   --dourado-claro: #af8a34;
   --marrom: #5f4404;
+  --preto: #15130f;
 }
 
 @theme inline {
@@ -18,8 +19,9 @@
   --color-dourado: var(--dourado);
   --color-dourado-claro: var(--dourado-claro);
   --color-marrom: var(--marrom);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-preto: var(--preto);
+  --font-sans: var(--font-public-sans);
+  --font-serif: var(--font-fraunces);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -32,5 +34,5 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
