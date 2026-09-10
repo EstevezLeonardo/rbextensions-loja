@@ -52,7 +52,7 @@ export interface ItemNavegacao {
 }
 
 export const ITENS_NAVEGACAO: ItemNavegacao[] = [
-  { rotulo: "Cabelos", href: "/", Icone: IconeCabelos },
+  { rotulo: "Cabelos", href: "/cabelos", Icone: IconeCabelos },
   { rotulo: "Produtos e Acessórios", href: "/produtos", Icone: IconeProdutos },
   { rotulo: "Sobre Nós", href: "/sobre", Icone: IconeSobre },
   { rotulo: "Consultoria", href: "/consultoria", Icone: IconeConsultoria },

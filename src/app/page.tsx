@@ -1,175 +1,50 @@
 import Link from "next/link";
-import { buscarFiltros, buscarProdutos, type OpcaoDeFiltro, type Produto } from "@/lib/api";
+import { buscarProdutos, type Produto } from "@/lib/api";
 import { ITENS_NAVEGACAO } from "@/lib/navegacaoPrincipal";
-
-interface FiltrosAtuais {
-  categoria?: string;
-  tom?: string;
-  comprimento?: string;
-  busca?: string;
-  pagina?: string;
-}
-
-interface HomeProps {
-  searchParams: Promise<FiltrosAtuais>;
-}
+import { CartaoProduto } from "@/components/CartaoProduto";
 
 /**
- * Home: hero + navegação por categoria + catálogo real (api/produtos.php)
- * com "Critérios de Escolha" (api/filtros.php, com contagem por opção).
- * Filtros (e a busca do header) vivem na URL — sem JS de cliente, cada
- * opção/form é só um link/GET.
+ * Home: hero + navegação por categoria + uma prévia do catálogo. O
+ * catálogo completo (filtros, busca, paginação) vive em /cabelos.
  */
-export default async function Home({ searchParams }: HomeProps) {
-  const filtrosAtuais = await searchParams;
-  const pagina = filtrosAtuais.pagina ? Number(filtrosAtuais.pagina) : 1;
-
-  const [{ produtos, paginaAtual, totalPaginas }, filtros, { produtos: destaques }] = await Promise.all([
-    buscarProdutos({
-      busca: filtrosAtuais.busca,
-      categoria: filtrosAtuais.categoria,
-      tom: filtrosAtuais.tom,
-      comprimento: filtrosAtuais.comprimento ? Number(filtrosAtuais.comprimento) : undefined,
-      pagina,
-    }),
-    buscarFiltros(),
-    // independente dos filtros ativos — o hero mostra sempre o mesmo destaque
-    buscarProdutos({ pagina: 1 }),
-  ]);
-
-  const produtoDestaque = destaques[0];
-
-  const algumFiltroAtivo = Boolean(
-    filtrosAtuais.categoria || filtrosAtuais.tom || filtrosAtuais.comprimento || filtrosAtuais.busca
-  );
+export default async function Home() {
+  const { produtos } = await buscarProdutos({ pagina: 1 });
+  const produtoDestaque = produtos[0];
+  const produtosDestaque = produtos.slice(0, 4);
 
   return (
     <main className="flex flex-1 flex-col">
       <SecaoHero produtoDestaque={produtoDestaque} />
       <SecaoCategorias />
 
-      <section id="catalogo" className="mx-auto w-full max-w-6xl px-6 py-14">
-        <div aria-labelledby="criterios-titulo" className="mb-10">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 id="criterios-titulo" className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-              Critérios de Escolha
-            </h2>
-            {algumFiltroAtivo && (
-              <Link href="/" className="text-sm font-semibold text-dourado hover:text-marrom">
-                Limpar filtros
-              </Link>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <GrupoDeFiltro
-              titulo="Tom"
-              chave="tom"
-              opcoes={filtros.tons}
-              valorAtivo={filtrosAtuais.tom}
-              filtrosAtuais={filtrosAtuais}
-              sufixo=""
-            />
-            <GrupoDeFiltro
-              titulo="Comprimento"
-              chave="comprimento"
-              opcoes={filtros.comprimentos}
-              valorAtivo={filtrosAtuais.comprimento}
-              filtrosAtuais={filtrosAtuais}
-              sufixo="cm"
-            />
-            <GrupoDeFiltro
-              titulo="Perfil do fio"
-              chave="categoria"
-              opcoes={filtros.categorias}
-              valorAtivo={filtrosAtuais.categoria}
-              filtrosAtuais={filtrosAtuais}
-              sufixo=""
-            />
-          </div>
-        </div>
-
-        {produtos.length === 0 ? (
-          <p className="py-12 text-center text-zinc-500">Nenhum produto encontrado com esses critérios.</p>
-        ) : (
-          <>
-            <div className="mb-6">
+      {produtosDestaque.length > 0 && (
+        <section className="mx-auto w-full max-w-6xl px-6 py-14">
+          <div className="mb-6 flex items-baseline justify-between">
+            <div>
               <p className="text-xs font-bold uppercase tracking-widest text-dourado">Catálogo</p>
               <h2 className="mt-1 font-serif text-2xl font-medium text-preto">Cabelos em destaque</h2>
             </div>
+            <Link href="/cabelos" className="text-sm font-semibold text-marrom hover:text-dourado">
+              Ver todos os cabelos →
+            </Link>
+          </div>
 
-            <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
-              {produtos.map((produto) => (
-                <li key={produto.id}>
-                  <Link
-                    href={`/produtos/${produto.codigo}`}
-                    className="group block overflow-hidden rounded-2xl border border-zinc-200 bg-white transition hover:-translate-y-1 hover:shadow-lg"
-                  >
-                    <div className="relative aspect-square bg-zinc-50">
-                      <span
-                        className={
-                          produto.disponivel
-                            ? "absolute left-3 top-3 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700"
-                            : "absolute left-3 top-3 rounded-full bg-red-50 px-2.5 py-1 text-[11px] font-bold text-red-700"
-                        }
-                      >
-                        {produto.disponivel ? "Disponível" : "Esgotado"}
-                      </span>
-                      {produto.foto ? (
-                        // eslint-disable-next-line @next/next/no-img-element -- foto vem de outra origem (dashboard PHP), plain <img> em vez de next/image por enquanto
-                        <img src={produto.foto} alt={produto.nome} className="h-full w-full object-cover" />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-xs text-zinc-400">Sem foto</div>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <p className="text-[11px] font-bold uppercase tracking-wide text-zinc-400">
-                        {[produto.categoria, produto.tom, produto.comprimento ? `${produto.comprimento}cm` : null]
-                          .filter(Boolean)
-                          .join(" · ")}
-                      </p>
-                      <h3 className="mt-1 text-[15px] font-semibold text-preto">{produto.nome}</h3>
-                      <div className="mt-3 flex items-center justify-between">
-                        <span className="font-serif text-lg text-marrom">
-                          {produto.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-                        </span>
-                        <span className="text-xs font-semibold text-dourado opacity-0 transition group-hover:opacity-100">
-                          Ver opções →
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-
-            {totalPaginas > 1 && (
-              <nav aria-label="Paginação" className="mt-8 flex items-center justify-center gap-2">
-                {Array.from({ length: totalPaginas }, (_, indice) => indice + 1).map((numeroDaPagina) => (
-                  <Link
-                    key={numeroDaPagina}
-                    href={construirHref(filtrosAtuais, "pagina", String(numeroDaPagina))}
-                    className={
-                      numeroDaPagina === paginaAtual
-                        ? "rounded-full bg-dourado px-3.5 py-1.5 text-sm font-semibold text-white"
-                        : "rounded-full border border-zinc-200 px-3.5 py-1.5 text-sm font-medium text-marrom hover:border-dourado-claro"
-                    }
-                  >
-                    {numeroDaPagina}
-                  </Link>
-                ))}
-              </nav>
-            )}
-          </>
-        )}
-      </section>
+          <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+            {produtosDestaque.map((produto) => (
+              <li key={produto.id}>
+                <CartaoProduto produto={produto} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <SecaoCtaContato />
     </main>
   );
 }
 
-/** Banner preto no topo — headline + CTA + o produto mais recente em destaque (não muda com os filtros abaixo). */
+/** Banner preto no topo — headline + CTA + o produto mais recente em destaque. */
 function SecaoHero({ produtoDestaque }: { produtoDestaque?: Produto }) {
   return (
     <section className="bg-preto">
@@ -189,12 +64,12 @@ function SecaoHero({ produtoDestaque }: { produtoDestaque?: Produto }) {
             Extensions é conhecida por entregar.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-6">
-            <a
-              href="#catalogo"
+            <Link
+              href="/cabelos"
               className="rounded-[3px] bg-dourado px-7 py-3.5 text-sm font-bold text-white hover:bg-dourado-claro"
             >
               Ver cabelos disponíveis
-            </a>
+            </Link>
             <a
               href="https://wa.me/5521972701658"
               target="_blank"
@@ -302,89 +177,4 @@ function SecaoCtaContato() {
       </div>
     </section>
   );
-}
-
-/** Uma coluna de "Critérios de Escolha" (ex: Tom) — cada opção já é o link que aplica aquele filtro. */
-function GrupoDeFiltro({
-  titulo,
-  chave,
-  opcoes,
-  valorAtivo,
-  filtrosAtuais,
-  sufixo,
-}: {
-  titulo: string;
-  chave: "categoria" | "tom" | "comprimento";
-  opcoes: OpcaoDeFiltro[];
-  valorAtivo: string | undefined;
-  filtrosAtuais: FiltrosAtuais;
-  sufixo: string;
-}) {
-  if (opcoes.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
-      <h3 className="mb-3 text-sm font-semibold text-preto">{titulo}</h3>
-      <div className="flex flex-wrap gap-2">
-        {opcoes.map((opcao) => {
-          const valor = String(opcao.valor);
-          const ativo = valorAtivo === valor;
-          return (
-            <Link
-              key={valor}
-              href={construirHref(filtrosAtuais, chave, valor)}
-              className={
-                ativo
-                  ? "inline-flex items-center gap-1.5 rounded-full bg-dourado px-3 py-1.5 text-xs font-semibold text-white"
-                  : "inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:border-dourado-claro hover:text-marrom"
-              }
-            >
-              <span>
-                {valor}
-                {sufixo}
-              </span>
-              <span className={ativo ? "text-white/80" : "text-zinc-400"}>({opcao.total})</span>
-            </Link>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-/**
- * Monta a URL de "/" com os filtros atuais + a mudança pedida (chave/valor).
- * Clicar de novo na mesma opção já ativa remove o filtro (alterna); trocar
- * qualquer filtro (menos a própria página) volta pra página 1.
- */
-function construirHref(
-  filtrosAtuais: FiltrosAtuais,
-  chave: keyof FiltrosAtuais,
-  valor: string
-): string {
-  const parametros = new URLSearchParams();
-  const jaEstaAtivo = filtrosAtuais[chave] === valor;
-
-  (Object.keys(filtrosAtuais) as (keyof FiltrosAtuais)[]).forEach((chaveAtual) => {
-    const valorAtual = filtrosAtuais[chaveAtual];
-    if (valorAtual) {
-      parametros.set(chaveAtual, valorAtual);
-    }
-  });
-
-  if (chave === "pagina") {
-    parametros.set("pagina", valor);
-  } else {
-    parametros.delete("pagina");
-    if (jaEstaAtivo) {
-      parametros.delete(chave);
-    } else {
-      parametros.set(chave, valor);
-    }
-  }
-
-  const query = parametros.toString();
-  return query ? `/?${query}` : "/";
 }
