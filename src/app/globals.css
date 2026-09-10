@@ -10,6 +10,7 @@
   --dourado: #a37407;
   --dourado-claro: #af8a34;
   --marrom: #5f4404;
+  --marrom-escuro: #3d2c03;
   --preto: #15130f;
 }
 
@@ -19,6 +20,7 @@
   --color-dourado: var(--dourado);
   --color-dourado-claro: var(--dourado-claro);
   --color-marrom: var(--marrom);
+  --color-marrom-escuro: var(--marrom-escuro);
   --color-preto: var(--preto);
   --font-sans: var(--font-public-sans);
   --font-serif: var(--font-fraunces);
@@ -35,4 +37,13 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Fundo escuro do hero e da banda de CTA — gradiente sutil preto/marrom com um
+   brilho dourado bem discreto num canto, em vez de preto chapado (achado
+   agressivo demais). */
+.fundo-luxo {
+  background-image:
+    radial-gradient(80% 60% at 85% 15%, rgba(175, 138, 52, 0.16), transparent 70%),
+    linear-gradient(135deg, var(--preto) 0%, var(--marrom-escuro) 100%);
 }

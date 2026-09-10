@@ -46,10 +46,10 @@ export default async function Home() {
   );
 }
 
-/** Banner preto no topo — headline + CTA + o produto mais recente em destaque. */
+/** Banner escuro no topo — headline + CTA + o produto mais recente em destaque. */
 function SecaoHero({ produtoDestaque }: { produtoDestaque?: Produto }) {
   return (
-    <section className="bg-preto">
+    <section className="fundo-luxo">
       <div className="mx-auto grid max-w-6xl gap-12 px-6 py-16 sm:py-20 md:grid-cols-[1fr_0.78fr] md:items-center md:py-24">
         <div>
           <div className="flex items-center gap-2.5">
@@ -150,7 +150,7 @@ function SecaoCategorias() {
 function SecaoCtaContato() {
   return (
     <section className="mx-auto w-full max-w-6xl px-6 pb-16">
-      <div className="flex flex-col items-start justify-between gap-6 rounded-md bg-preto px-8 py-10 text-white sm:flex-row sm:items-center sm:px-12">
+      <div className="fundo-luxo flex flex-col items-start justify-between gap-6 rounded-md px-8 py-10 text-white sm:flex-row sm:items-center sm:px-12">
         <div>
           <h3 className="font-serif text-xl font-medium sm:text-2xl">Não sabe qual extensão combina com você?</h3>
           <p className="mt-1.5 max-w-md text-sm text-zinc-400">
