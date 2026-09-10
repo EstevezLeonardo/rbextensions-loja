@@ -22,11 +22,12 @@ export function MenuConta() {
 
   return (
     <div className="flex items-center gap-3 text-sm">
-      <span className="text-zinc-600">
+      <span className="hidden text-zinc-600 sm:inline">
         Olá, <span className="font-medium text-marrom">{cliente.nome}</span>
       </span>
       <Link href="/meus-pedidos" className="font-medium text-marrom hover:text-dourado">
-        Meus Pedidos
+        <span className="hidden sm:inline">Meus Pedidos</span>
+        <span className="sm:hidden">Pedidos</span>
       </Link>
       <button type="button" onClick={sair} className="font-medium text-zinc-500 hover:text-dourado">
         Sair
