@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { buscarFiltros, buscarProdutos, type OpcaoDeFiltro } from "@/lib/api";
 import { CartaoProduto } from "@/components/CartaoProduto";
+import { FaixaDeConfianca } from "@/components/FaixaDeConfianca";
 
 interface FiltrosAtuais {
   categoria?: string;
@@ -49,6 +50,8 @@ export default async function CabelosPage({ searchParams }: CabelosPageProps) {
           </p>
         </div>
       </section>
+
+      <FaixaDeConfianca />
 
       <section className="mx-auto w-full max-w-6xl px-6 py-10">
         <div className="mb-10">

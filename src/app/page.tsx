@@ -2,6 +2,7 @@ import Link from "next/link";
 import { buscarProdutos, type Produto } from "@/lib/api";
 import { ITENS_NAVEGACAO } from "@/lib/navegacaoPrincipal";
 import { CartaoProduto } from "@/components/CartaoProduto";
+import { FaixaDeConfianca } from "@/components/FaixaDeConfianca";
 
 /**
  * Home: hero + navegação por categoria + uma prévia do catálogo. O
@@ -15,6 +16,7 @@ export default async function Home() {
   return (
     <main className="flex flex-1 flex-col">
       <SecaoHero produtoDestaque={produtoDestaque} />
+      <FaixaDeConfianca />
       <SecaoCategorias />
 
       {produtosDestaque.length > 0 && (
