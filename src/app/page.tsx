@@ -9,7 +9,7 @@ import { FaixaDeConfianca } from "@/components/FaixaDeConfianca";
  * catálogo completo (filtros, busca, paginação) vive em /cabelos.
  */
 export default async function Home() {
-  const { produtos } = await buscarProdutos({ pagina: 1 });
+  const { produtos } = await buscarProdutos({ tipo: "cabelo", pagina: 1 });
   const produtoDestaque = produtos[0];
   const produtosDestaque = produtos.slice(0, 4);
 

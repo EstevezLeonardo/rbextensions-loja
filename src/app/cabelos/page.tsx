@@ -27,6 +27,7 @@ export default async function CabelosPage({ searchParams }: CabelosPageProps) {
   const [{ produtos, paginaAtual, totalPaginas }, filtros] = await Promise.all([
     buscarProdutos({
       busca: filtrosAtuais.busca,
+      tipo: "cabelo",
       categoria: filtrosAtuais.categoria,
       tom: filtrosAtuais.tom,
       comprimento: filtrosAtuais.comprimento ? Number(filtrosAtuais.comprimento) : undefined,

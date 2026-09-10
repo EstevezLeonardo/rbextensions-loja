@@ -1,8 +1,12 @@
 import Link from "next/link";
 import type { Produto } from "@/lib/api";
 
-/** Card de produto do catálogo — usado na home (destaques) e em /cabelos (grade completa). */
+/** Card de produto do catálogo — usado na home, em /cabelos e em /produtos. */
 export function CartaoProduto({ produto }: { produto: Produto }) {
+  const meta = [produto.categoria, produto.tom, produto.comprimento ? `${produto.comprimento}cm` : null]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
     <Link
       href={`/produtos/${produto.codigo}`}
@@ -26,12 +30,10 @@ export function CartaoProduto({ produto }: { produto: Produto }) {
         )}
       </div>
       <div className="p-4">
-        <p className="text-[11px] font-bold uppercase tracking-wide text-zinc-400">
-          {[produto.categoria, produto.tom, produto.comprimento ? `${produto.comprimento}cm` : null]
-            .filter(Boolean)
-            .join(" · ")}
-        </p>
-        <h3 className="mt-1 text-[15px] font-semibold text-preto">{produto.nome}</h3>
+        {meta && <p className="text-[11px] font-bold uppercase tracking-wide text-zinc-400">{meta}</p>}
+        <h3 className={meta ? "mt-1 text-[15px] font-semibold text-preto" : "text-[15px] font-semibold text-preto"}>
+          {produto.nome}
+        </h3>
         <div className="mt-3 flex items-center justify-between">
           <span className="font-serif text-lg text-marrom">
             {produto.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}

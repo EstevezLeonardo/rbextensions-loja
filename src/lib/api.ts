@@ -13,6 +13,7 @@ const API_BASE_URL = process.env.API_BASE_URL ?? "http://localhost/rbextensions/
 export interface Produto {
   id: number;
   codigo: string;
+  tipoProduto: "cabelo" | "acessorio";
   nome: string;
   descricao: string;
   categoria: string;
@@ -37,11 +38,14 @@ interface RespostaProdutos {
 
 /**
  * Busca uma página do catálogo (api/produtos.php). $opcoes espelha os
- * filtros que o endpoint aceita — busca (nome/código), categoria
- * (perfil do fio), tom (cor) e comprimento (cm).
+ * filtros que o endpoint aceita — busca (nome/código), tipo ('cabelo'
+ * pra /cabelos ou 'acessorio' pra /produtos), categoria (perfil do
+ * fio), tom (cor) e comprimento (cm) — esses três últimos só valem
+ * pra tipo 'cabelo'.
  */
 export async function buscarProdutos(opcoes?: {
   busca?: string;
+  tipo?: "cabelo" | "acessorio";
   categoria?: string;
   tom?: string;
   comprimento?: number;
@@ -49,6 +53,7 @@ export async function buscarProdutos(opcoes?: {
 }): Promise<RespostaProdutos> {
   const parametros = new URLSearchParams();
   if (opcoes?.busca) parametros.set("busca", opcoes.busca);
+  if (opcoes?.tipo) parametros.set("tipo", opcoes.tipo);
   if (opcoes?.categoria) parametros.set("categoria", opcoes.categoria);
   if (opcoes?.tom) parametros.set("tom", opcoes.tom);
   if (opcoes?.comprimento) parametros.set("comprimento", String(opcoes.comprimento));
