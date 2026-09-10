@@ -6,7 +6,7 @@ export function Rodape() {
   const anoAtual = new Date().getFullYear();
 
   return (
-    <footer className="mt-auto bg-preto text-zinc-400">
+    <footer className="fundo-luxo mt-auto text-zinc-400">
       <div className="mx-auto grid max-w-6xl gap-10 px-6 py-14 sm:grid-cols-[1.4fr_1fr_1fr]">
         <div>
           <p className="font-serif text-lg text-white">
