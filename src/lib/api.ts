@@ -13,7 +13,7 @@ const API_BASE_URL = process.env.API_BASE_URL ?? "http://localhost/rbextensions/
 export interface Produto {
   id: number;
   codigo: string;
-  tipoProduto: "cabelo" | "acessorio";
+  tipoProduto: "cabelo" | "laces" | "acessorio";
   nome: string;
   descricao: string;
   categoria: string;
@@ -39,13 +39,13 @@ interface RespostaProdutos {
 /**
  * Busca uma página do catálogo (api/produtos.php). $opcoes espelha os
  * filtros que o endpoint aceita — busca (nome/código), tipo ('cabelo'
- * pra /cabelos ou 'acessorio' pra /produtos), categoria (perfil do
- * fio), tom (cor) e comprimento (cm) — esses três últimos só valem
- * pra tipo 'cabelo'.
+ * pra /cabelos, 'laces' pra /laces-e-perucas ou 'acessorio' pra
+ * /produtos), categoria (perfil do fio), tom (cor) e comprimento
+ * (cm) — esses três últimos só valem pra 'cabelo'/'laces'.
  */
 export async function buscarProdutos(opcoes?: {
   busca?: string;
-  tipo?: "cabelo" | "acessorio";
+  tipo?: "cabelo" | "laces" | "acessorio";
   categoria?: string;
   tom?: string;
   comprimento?: number;
@@ -108,9 +108,13 @@ interface RespostaFiltros {
  * Busca as opções de filtro do catálogo (api/filtros.php), cada uma
  * já com a contagem de produtos ativos — pra montar a seção de
  * critérios de escolha (Tom/Comprimento/Perfil do fio) da loja.
+ * $tipo é 'cabelo' (padrão, /cabelos) ou 'laces' (/laces-e-perucas).
  */
-export async function buscarFiltros(): Promise<RespostaFiltros> {
-  const resposta = await fetch(`${API_BASE_URL}/filtros.php`, {
+export async function buscarFiltros(tipo?: "cabelo" | "laces"): Promise<RespostaFiltros> {
+  const parametros = new URLSearchParams();
+  if (tipo) parametros.set("tipo", tipo);
+
+  const resposta = await fetch(`${API_BASE_URL}/filtros.php?${parametros.toString()}`, {
     next: { revalidate: 60 },
   });
 

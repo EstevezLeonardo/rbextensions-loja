@@ -28,7 +28,13 @@ export default async function ProdutoPage({ params }: ProdutoPageProps) {
       <main className="flex-1 px-6 py-8">
         <div className="mx-auto max-w-4xl">
           <Link
-            href={produto.tipoProduto === "acessorio" ? "/produtos" : "/cabelos"}
+            href={
+              produto.tipoProduto === "acessorio"
+                ? "/produtos"
+                : produto.tipoProduto === "laces"
+                  ? "/laces-e-perucas"
+                  : "/cabelos"
+            }
             className="text-sm font-medium text-zinc-500 hover:text-marrom"
           >
             ← Voltar ao catálogo
