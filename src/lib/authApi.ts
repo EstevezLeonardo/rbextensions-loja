@@ -73,3 +73,43 @@ export async function buscarMeusPedidos(token: string): Promise<Pedido[]> {
   const dados = await resposta.json();
   return dados.pedidos as Pedido[];
 }
+
+export interface PerfilCliente {
+  nome: string;
+  sobrenome: string;
+  email: string;
+}
+
+export async function buscarMeuPerfil(token: string): Promise<PerfilCliente> {
+  const resposta = await fetch(`${API_BASE_URL_PUBLICO}/cliente-perfil.php`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!resposta.ok) {
+    throw new Error("Não foi possível carregar seus dados agora.");
+  }
+
+  return resposta.json() as Promise<PerfilCliente>;
+}
+
+/**
+ * Atualiza nome/sobrenome/e-mail do cliente logado — senhaAtual/novaSenha
+ * são opcionais, só exigidos juntos quando a pessoa quer trocar de senha
+ * (ver api/cliente-atualizar.php).
+ */
+export async function atualizarMeuPerfil(
+  token: string,
+  dados: { nome: string; sobrenome: string; email: string; senhaAtual?: string; novaSenha?: string }
+): Promise<PerfilCliente> {
+  const resposta = await fetch(`${API_BASE_URL_PUBLICO}/cliente-atualizar.php`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(dados),
+  });
+
+  const corpo = await resposta.json();
+  if (!resposta.ok) {
+    throw new Error(corpo.erro ?? "Não foi possível salvar seus dados agora.");
+  }
+  return corpo as PerfilCliente;
+}

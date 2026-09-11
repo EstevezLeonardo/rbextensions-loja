@@ -20,6 +20,7 @@ interface AuthContextValor {
   carregado: boolean;
   entrar: (sessao: SessaoSalva) => void;
   sair: () => void;
+  atualizarCliente: (dados: Cliente) => void;
 }
 
 const AuthContext = createContext<AuthContextValor | null>(null);
@@ -73,10 +74,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  /**
+   * Atualiza nome/email da sessão já logada (mesmo token) — usado depois
+   * de salvar em /meus-dados, pra "Olá, {nome}" no header refletir na
+   * hora, sem precisar logar de novo.
+   */
+  function atualizarCliente(dados: Cliente) {
+    setSessao((atual) => {
+      if (!atual) return atual;
+      const novaSessao = { ...atual, ...dados };
+      try {
+        localStorage.setItem(CHAVE_LOCAL_STORAGE, JSON.stringify(novaSessao));
+      } catch {
+        // idem acima
+      }
+      return novaSessao;
+    });
+  }
+
   const cliente = sessao ? { nome: sessao.nome, email: sessao.email } : null;
 
   return (
-    <AuthContext.Provider value={{ cliente, token: sessao?.token ?? null, carregado, entrar, sair }}>
+    <AuthContext.Provider value={{ cliente, token: sessao?.token ?? null, carregado, entrar, sair, atualizarCliente }}>
       {children}
     </AuthContext.Provider>
   );

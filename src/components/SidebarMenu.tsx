@@ -23,6 +23,15 @@ function IconeMeusPedidos({ className }: { className?: string }) {
   );
 }
 
+function IconeMeusDados({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className={className} aria-hidden="true">
+      <circle cx="12" cy="8.25" r="3.25" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4.75 19.5a7.25 7.25 0 0 1 14.5 0" />
+    </svg>
+  );
+}
+
 /**
  * Sidebar flutuante (off-canvas) — navegação principal da loja, aberta por um
  * botão hamburger no header. Lista em ITENS_MENU pra facilitar adicionar
@@ -127,6 +136,14 @@ export function SidebarMenu() {
               >
                 <IconeMeusPedidos className="h-5 w-5 shrink-0" />
                 Meus Pedidos
+              </Link>
+              <Link
+                href="/meus-dados"
+                onClick={() => setAberto(false)}
+                className="flex items-center gap-3 rounded-lg px-3 py-3 text-[15px] font-medium text-marrom hover:bg-dourado/10 hover:text-dourado"
+              >
+                <IconeMeusDados className="h-5 w-5 shrink-0" />
+                Meus Dados
               </Link>
             </>
           )}
