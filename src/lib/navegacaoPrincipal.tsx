@@ -24,6 +24,15 @@ export function IconeProdutos({ className }: { className?: string }) {
   );
 }
 
+export function IconeLacesPerucas({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className={className} aria-hidden="true">
+      <path strokeLinecap="round" d="M4.5 13.5a7.5 7.5 0 0 1 15 0" />
+      <path strokeLinecap="round" d="M4.5 13.5v3M8 13.5v4.5M12 13.5v5M16 13.5v4.5M19.5 13.5v3" />
+    </svg>
+  );
+}
+
 export function IconeSobre({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className={className} aria-hidden="true">
@@ -54,6 +63,7 @@ export interface ItemNavegacao {
 export const ITENS_NAVEGACAO: ItemNavegacao[] = [
   { rotulo: "Cabelos", href: "/cabelos", Icone: IconeCabelos },
   { rotulo: "Produtos e Acessórios", href: "/produtos", Icone: IconeProdutos },
+  { rotulo: "Laces e Perucas", href: "/laces-e-perucas", Icone: IconeLacesPerucas },
   { rotulo: "Sobre Nós", href: "/sobre", Icone: IconeSobre },
   { rotulo: "Consultoria", href: "/consultoria", Icone: IconeConsultoria },
 ];
