@@ -5,6 +5,15 @@ import Link from "next/link";
 import { ITENS_NAVEGACAO } from "@/lib/navegacaoPrincipal";
 import { useAuth } from "@/contexts/AuthContext";
 
+function IconeHome({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className={className} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 10.5 12 3l9 7.5" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 9v10.5a.75.75 0 0 0 .75.75h3.75v-6h4.5v6H18a.75.75 0 0 0 .75-.75V9" />
+    </svg>
+  );
+}
+
 function IconeMeusPedidos({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className={className} aria-hidden="true">
@@ -87,6 +96,15 @@ export function SidebarMenu() {
         </div>
 
         <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 py-4">
+          <Link
+            href="/"
+            onClick={() => setAberto(false)}
+            className="flex items-center gap-3 rounded-lg px-3 py-3 text-[15px] font-medium text-marrom hover:bg-dourado/10 hover:text-dourado"
+          >
+            <IconeHome className="h-5 w-5 shrink-0" />
+            Home
+          </Link>
+
           {ITENS_NAVEGACAO.map(({ rotulo, href, Icone }) => (
             <Link
               key={href}
