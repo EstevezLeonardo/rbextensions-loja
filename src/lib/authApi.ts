@@ -56,6 +56,8 @@ export interface Pedido {
   valorTotal: number;
   formaPagamento: string;
   status: string;
+  /** "em_preparacao" (Em curso) ou "concluido" (Finalizado) — controlado pelo dashboard em Vendas. */
+  statusEntrega: "em_preparacao" | "concluido";
   itens: ItemDePedido[];
 }
 

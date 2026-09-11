@@ -3,6 +3,16 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ITENS_NAVEGACAO } from "@/lib/navegacaoPrincipal";
+import { useAuth } from "@/contexts/AuthContext";
+
+function IconeMeusPedidos({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className={className} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 8.25 12 3.75l8.25 4.5v7.5L12 20.25l-8.25-4.5v-7.5Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 8.25 12 12.75l8.25-4.5M12 12.75v7.5" />
+    </svg>
+  );
+}
 
 /**
  * Sidebar flutuante (off-canvas) — navegação principal da loja, aberta por um
@@ -11,6 +21,7 @@ import { ITENS_NAVEGACAO } from "@/lib/navegacaoPrincipal";
  */
 export function SidebarMenu() {
   const [aberto, setAberto] = useState(false);
+  const { cliente } = useAuth();
 
   useEffect(() => {
     if (!aberto) return;
@@ -87,6 +98,20 @@ export function SidebarMenu() {
               {rotulo}
             </Link>
           ))}
+
+          {cliente && (
+            <>
+              <p className="mt-3 px-3 text-xs font-semibold uppercase tracking-wide text-zinc-400">Sua conta</p>
+              <Link
+                href="/meus-pedidos"
+                onClick={() => setAberto(false)}
+                className="flex items-center gap-3 rounded-lg px-3 py-3 text-[15px] font-medium text-marrom hover:bg-dourado/10 hover:text-dourado"
+              >
+                <IconeMeusPedidos className="h-5 w-5 shrink-0" />
+                Meus Pedidos
+              </Link>
+            </>
+          )}
         </nav>
 
         <div className="border-t border-zinc-200 px-5 py-4 text-xs text-zinc-500">
