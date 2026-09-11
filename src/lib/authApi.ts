@@ -74,10 +74,22 @@ export async function buscarMeusPedidos(token: string): Promise<Pedido[]> {
   return dados.pedidos as Pedido[];
 }
 
+export interface EnderecoCliente {
+  cep: string;
+  rua: string;
+  numero: string;
+  complemento: string;
+  bairro: string;
+  cidade: string;
+  uf: string;
+}
+
 export interface PerfilCliente {
   nome: string;
   sobrenome: string;
   email: string;
+  cpf: string;
+  endereco: EnderecoCliente;
 }
 
 export async function buscarMeuPerfil(token: string): Promise<PerfilCliente> {
@@ -93,13 +105,22 @@ export async function buscarMeuPerfil(token: string): Promise<PerfilCliente> {
 }
 
 /**
- * Atualiza nome/sobrenome/e-mail do cliente logado — senhaAtual/novaSenha
- * são opcionais, só exigidos juntos quando a pessoa quer trocar de senha
- * (ver api/cliente-atualizar.php).
+ * Atualiza nome/sobrenome/e-mail/cpf/endereço do cliente logado —
+ * cpf e os campos de endereco são opcionais (string vazia limpa o
+ * campo); senhaAtual/novaSenha são opcionais, só exigidos juntos
+ * quando a pessoa quer trocar de senha (ver api/cliente-atualizar.php).
  */
 export async function atualizarMeuPerfil(
   token: string,
-  dados: { nome: string; sobrenome: string; email: string; senhaAtual?: string; novaSenha?: string }
+  dados: {
+    nome: string;
+    sobrenome: string;
+    email: string;
+    cpf?: string;
+    endereco?: EnderecoCliente;
+    senhaAtual?: string;
+    novaSenha?: string;
+  }
 ): Promise<PerfilCliente> {
   const resposta = await fetch(`${API_BASE_URL_PUBLICO}/cliente-atualizar.php`, {
     method: "POST",

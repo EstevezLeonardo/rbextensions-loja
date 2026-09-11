@@ -8,6 +8,11 @@ import { atualizarMeuPerfil, buscarMeuPerfil } from "@/lib/authApi";
 const classeCampo = "mt-1 w-full rounded border border-zinc-300 px-3 py-2 text-sm";
 const classeLabel = "block text-xs font-medium text-zinc-600";
 
+const UFS = [
+  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR",
+  "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO",
+];
+
 /** Gerenciar dados de perfil do cliente logado (nome/sobrenome/e-mail e, opcionalmente, senha) — redireciona para /entrar se não houver sessão. */
 export default function MeusDadosPage() {
   const router = useRouter();
@@ -16,6 +21,16 @@ export default function MeusDadosPage() {
   const [nome, setNome] = useState("");
   const [sobrenome, setSobrenome] = useState("");
   const [email, setEmail] = useState("");
+  const [cpf, setCpf] = useState("");
+
+  const [cep, setCep] = useState("");
+  const [rua, setRua] = useState("");
+  const [numero, setNumero] = useState("");
+  const [complemento, setComplemento] = useState("");
+  const [bairro, setBairro] = useState("");
+  const [cidade, setCidade] = useState("");
+  const [uf, setUf] = useState("");
+
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmarNovaSenha, setConfirmarNovaSenha] = useState("");
@@ -38,6 +53,14 @@ export default function MeusDadosPage() {
         setNome(perfil.nome);
         setSobrenome(perfil.sobrenome);
         setEmail(perfil.email);
+        setCpf(perfil.cpf);
+        setCep(perfil.endereco.cep);
+        setRua(perfil.endereco.rua);
+        setNumero(perfil.endereco.numero);
+        setComplemento(perfil.endereco.complemento);
+        setBairro(perfil.endereco.bairro);
+        setCidade(perfil.endereco.cidade);
+        setUf(perfil.endereco.uf);
       })
       .catch(() => setErro("Não foi possível carregar seus dados agora."))
       .finally(() => setCarregandoPerfil(false));
@@ -62,6 +85,8 @@ export default function MeusDadosPage() {
         nome,
         sobrenome,
         email,
+        cpf,
+        endereco: { cep, rua, numero, complemento, bairro, cidade, uf },
         senhaAtual: trocandoSenha ? senhaAtual : undefined,
         novaSenha: trocandoSenha ? novaSenha : undefined,
       });
@@ -118,16 +143,132 @@ export default function MeusDadosPage() {
                       />
                     </div>
                   </div>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div>
+                      <label htmlFor="email" className={classeLabel}>
+                        E-mail
+                      </label>
+                      <input
+                        id="email"
+                        type="email"
+                        required
+                        value={email}
+                        onChange={(evento) => setEmail(evento.target.value)}
+                        className={classeCampo}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="cpf" className={classeLabel}>
+                        CPF
+                      </label>
+                      <input
+                        id="cpf"
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="000.000.000-00"
+                        value={cpf}
+                        onChange={(evento) => setCpf(evento.target.value)}
+                        className={classeCampo}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-zinc-200 bg-white p-6">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">Meu endereço</h2>
+                <div className="mt-4 flex flex-col gap-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <div>
+                      <label htmlFor="cep" className={classeLabel}>
+                        CEP
+                      </label>
+                      <input
+                        id="cep"
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="00000-000"
+                        value={cep}
+                        onChange={(evento) => setCep(evento.target.value)}
+                        className={classeCampo}
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label htmlFor="rua" className={classeLabel}>
+                        Rua
+                      </label>
+                      <input
+                        id="rua"
+                        type="text"
+                        value={rua}
+                        onChange={(evento) => setRua(evento.target.value)}
+                        className={classeCampo}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div>
+                      <label htmlFor="numero" className={classeLabel}>
+                        Número
+                      </label>
+                      <input
+                        id="numero"
+                        type="text"
+                        value={numero}
+                        onChange={(evento) => setNumero(evento.target.value)}
+                        className={classeCampo}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="complemento" className={classeLabel}>
+                        Complemento
+                      </label>
+                      <input
+                        id="complemento"
+                        type="text"
+                        placeholder="Apto, bloco, ponto de referência..."
+                        value={complemento}
+                        onChange={(evento) => setComplemento(evento.target.value)}
+                        className={classeCampo}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <div className="sm:col-span-2">
+                      <label htmlFor="bairro" className={classeLabel}>
+                        Bairro
+                      </label>
+                      <input
+                        id="bairro"
+                        type="text"
+                        value={bairro}
+                        onChange={(evento) => setBairro(evento.target.value)}
+                        className={classeCampo}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="uf" className={classeLabel}>
+                        Estado
+                      </label>
+                      <select id="uf" value={uf} onChange={(evento) => setUf(evento.target.value)} className={classeCampo}>
+                        <option value="">—</option>
+                        {UFS.map((sigla) => (
+                          <option key={sigla} value={sigla}>
+                            {sigla}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
                   <div>
-                    <label htmlFor="email" className={classeLabel}>
-                      E-mail
+                    <label htmlFor="cidade" className={classeLabel}>
+                      Cidade
                     </label>
                     <input
-                      id="email"
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(evento) => setEmail(evento.target.value)}
+                      id="cidade"
+                      type="text"
+                      value={cidade}
+                      onChange={(evento) => setCidade(evento.target.value)}
                       className={classeCampo}
                     />
                   </div>
