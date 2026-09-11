@@ -13,7 +13,12 @@ const UFS = [
   "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO",
 ];
 
-/** Gerenciar dados de perfil do cliente logado (nome/sobrenome/e-mail e, opcionalmente, senha) — redireciona para /entrar se não houver sessão. */
+/**
+ * Gerenciar dados de perfil do cliente logado — redireciona para /entrar
+ * se não houver sessão. Dois formulários independentes: "Dados pessoais"
+ * + "Meu endereço" salvam juntos num botão só; "Alterar senha" tem o seu
+ * próprio botão, dentro do próprio card, e não mexe nos outros campos.
+ */
 export default function MeusDadosPage() {
   const router = useRouter();
   const { token, carregado, atualizarCliente } = useAuth();
@@ -36,9 +41,14 @@ export default function MeusDadosPage() {
   const [confirmarNovaSenha, setConfirmarNovaSenha] = useState("");
 
   const [carregandoPerfil, setCarregandoPerfil] = useState(true);
-  const [salvando, setSalvando] = useState(false);
-  const [erro, setErro] = useState<string | null>(null);
-  const [sucesso, setSucesso] = useState<string | null>(null);
+
+  const [salvandoDados, setSalvandoDados] = useState(false);
+  const [erroDados, setErroDados] = useState<string | null>(null);
+  const [sucessoDados, setSucessoDados] = useState<string | null>(null);
+
+  const [salvandoSenha, setSalvandoSenha] = useState(false);
+  const [erroSenha, setErroSenha] = useState<string | null>(null);
+  const [sucessoSenha, setSucessoSenha] = useState<string | null>(null);
 
   useEffect(() => {
     if (!carregado) return;
@@ -62,24 +72,18 @@ export default function MeusDadosPage() {
         setCidade(perfil.endereco.cidade);
         setUf(perfil.endereco.uf);
       })
-      .catch(() => setErro("Não foi possível carregar seus dados agora."))
+      .catch(() => setErroDados("Não foi possível carregar seus dados agora."))
       .finally(() => setCarregandoPerfil(false));
   }, [carregado, token, router]);
 
-  async function handleSubmit(evento: FormEvent) {
+  /** Salva Dados Pessoais + Meu Endereço — não mexe em senha. */
+  async function handleSalvarDados(evento: FormEvent) {
     evento.preventDefault();
     if (!token) return;
 
-    setErro(null);
-    setSucesso(null);
-
-    const trocandoSenha = senhaAtual !== "" || novaSenha !== "" || confirmarNovaSenha !== "";
-    if (trocandoSenha && novaSenha !== confirmarNovaSenha) {
-      setErro("A confirmação da nova senha não confere.");
-      return;
-    }
-
-    setSalvando(true);
+    setErroDados(null);
+    setSucessoDados(null);
+    setSalvandoDados(true);
     try {
       const perfilAtualizado = await atualizarMeuPerfil(token, {
         nome,
@@ -87,18 +91,53 @@ export default function MeusDadosPage() {
         email,
         cpf,
         endereco: { cep, rua, numero, complemento, bairro, cidade, uf },
-        senhaAtual: trocandoSenha ? senhaAtual : undefined,
-        novaSenha: trocandoSenha ? novaSenha : undefined,
       });
       atualizarCliente({ nome: perfilAtualizado.nome, email: perfilAtualizado.email });
+      setSucessoDados("Dados atualizados com sucesso!");
+    } catch (erroCapturado) {
+      setErroDados(erroCapturado instanceof Error ? erroCapturado.message : "Não foi possível salvar seus dados agora.");
+    } finally {
+      setSalvandoDados(false);
+    }
+  }
+
+  /** Só troca a senha — reenvia nome/sobrenome/email/cpf/endereço atuais (o endpoint salva o perfil inteiro), sem alterá-los. */
+  async function handleAlterarSenha(evento: FormEvent) {
+    evento.preventDefault();
+    if (!token) return;
+
+    setErroSenha(null);
+    setSucessoSenha(null);
+
+    if (senhaAtual === "" || novaSenha === "") {
+      setErroSenha("Preencha a senha atual e a nova senha.");
+      return;
+    }
+
+    if (novaSenha !== confirmarNovaSenha) {
+      setErroSenha("A confirmação da nova senha não confere.");
+      return;
+    }
+
+    setSalvandoSenha(true);
+    try {
+      await atualizarMeuPerfil(token, {
+        nome,
+        sobrenome,
+        email,
+        cpf,
+        endereco: { cep, rua, numero, complemento, bairro, cidade, uf },
+        senhaAtual,
+        novaSenha,
+      });
       setSenhaAtual("");
       setNovaSenha("");
       setConfirmarNovaSenha("");
-      setSucesso("Dados atualizados com sucesso!");
+      setSucessoSenha("Senha alterada com sucesso!");
     } catch (erroCapturado) {
-      setErro(erroCapturado instanceof Error ? erroCapturado.message : "Não foi possível salvar seus dados agora.");
+      setErroSenha(erroCapturado instanceof Error ? erroCapturado.message : "Não foi possível alterar sua senha agora.");
     } finally {
-      setSalvando(false);
+      setSalvandoSenha(false);
     }
   }
 
@@ -111,173 +150,186 @@ export default function MeusDadosPage() {
           {carregandoPerfil ? (
             <p className="mt-4 text-zinc-500">Carregando...</p>
           ) : (
-            <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-6">
-              <div className="rounded-lg border border-zinc-200 bg-white p-6">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">Dados pessoais</h2>
-                <div className="mt-4 flex flex-col gap-3">
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div>
-                      <label htmlFor="nome" className={classeLabel}>
-                        Nome
-                      </label>
-                      <input
-                        id="nome"
-                        type="text"
-                        required
-                        value={nome}
-                        onChange={(evento) => setNome(evento.target.value)}
-                        className={classeCampo}
-                      />
+            <div className="mt-6 flex flex-col gap-6">
+              <form onSubmit={handleSalvarDados} className="flex flex-col gap-6">
+                <div className="rounded-lg border border-zinc-200 bg-white p-6">
+                  <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">Dados pessoais</h2>
+                  <div className="mt-4 flex flex-col gap-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div>
+                        <label htmlFor="nome" className={classeLabel}>
+                          Nome
+                        </label>
+                        <input
+                          id="nome"
+                          type="text"
+                          required
+                          value={nome}
+                          onChange={(evento) => setNome(evento.target.value)}
+                          className={classeCampo}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="sobrenome" className={classeLabel}>
+                          Sobrenome
+                        </label>
+                        <input
+                          id="sobrenome"
+                          type="text"
+                          required
+                          value={sobrenome}
+                          onChange={(evento) => setSobrenome(evento.target.value)}
+                          className={classeCampo}
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label htmlFor="sobrenome" className={classeLabel}>
-                        Sobrenome
-                      </label>
-                      <input
-                        id="sobrenome"
-                        type="text"
-                        required
-                        value={sobrenome}
-                        onChange={(evento) => setSobrenome(evento.target.value)}
-                        className={classeCampo}
-                      />
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div>
+                        <label htmlFor="email" className={classeLabel}>
+                          E-mail
+                        </label>
+                        <input
+                          id="email"
+                          type="email"
+                          required
+                          value={email}
+                          onChange={(evento) => setEmail(evento.target.value)}
+                          className={classeCampo}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="cpf" className={classeLabel}>
+                          CPF
+                        </label>
+                        <input
+                          id="cpf"
+                          type="text"
+                          inputMode="numeric"
+                          placeholder="000.000.000-00"
+                          value={cpf}
+                          onChange={(evento) => setCpf(evento.target.value)}
+                          className={classeCampo}
+                        />
+                      </div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div>
-                      <label htmlFor="email" className={classeLabel}>
-                        E-mail
-                      </label>
-                      <input
-                        id="email"
-                        type="email"
-                        required
-                        value={email}
-                        onChange={(evento) => setEmail(evento.target.value)}
-                        className={classeCampo}
-                      />
+                </div>
+
+                <div className="rounded-lg border border-zinc-200 bg-white p-6">
+                  <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">Meu endereço</h2>
+                  <div className="mt-4 flex flex-col gap-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                      <div>
+                        <label htmlFor="cep" className={classeLabel}>
+                          CEP
+                        </label>
+                        <input
+                          id="cep"
+                          type="text"
+                          inputMode="numeric"
+                          placeholder="00000-000"
+                          value={cep}
+                          onChange={(evento) => setCep(evento.target.value)}
+                          className={classeCampo}
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label htmlFor="rua" className={classeLabel}>
+                          Rua
+                        </label>
+                        <input
+                          id="rua"
+                          type="text"
+                          value={rua}
+                          onChange={(evento) => setRua(evento.target.value)}
+                          className={classeCampo}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div>
+                        <label htmlFor="numero" className={classeLabel}>
+                          Número
+                        </label>
+                        <input
+                          id="numero"
+                          type="text"
+                          value={numero}
+                          onChange={(evento) => setNumero(evento.target.value)}
+                          className={classeCampo}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="complemento" className={classeLabel}>
+                          Complemento
+                        </label>
+                        <input
+                          id="complemento"
+                          type="text"
+                          placeholder="Apto, bloco, ponto de referência..."
+                          value={complemento}
+                          onChange={(evento) => setComplemento(evento.target.value)}
+                          className={classeCampo}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                      <div className="sm:col-span-2">
+                        <label htmlFor="bairro" className={classeLabel}>
+                          Bairro
+                        </label>
+                        <input
+                          id="bairro"
+                          type="text"
+                          value={bairro}
+                          onChange={(evento) => setBairro(evento.target.value)}
+                          className={classeCampo}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="uf" className={classeLabel}>
+                          Estado
+                        </label>
+                        <select id="uf" value={uf} onChange={(evento) => setUf(evento.target.value)} className={classeCampo}>
+                          <option value="">—</option>
+                          {UFS.map((sigla) => (
+                            <option key={sigla} value={sigla}>
+                              {sigla}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
                     <div>
-                      <label htmlFor="cpf" className={classeLabel}>
-                        CPF
+                      <label htmlFor="cidade" className={classeLabel}>
+                        Cidade
                       </label>
                       <input
-                        id="cpf"
+                        id="cidade"
                         type="text"
-                        inputMode="numeric"
-                        placeholder="000.000.000-00"
-                        value={cpf}
-                        onChange={(evento) => setCpf(evento.target.value)}
+                        value={cidade}
+                        onChange={(evento) => setCidade(evento.target.value)}
                         className={classeCampo}
                       />
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="rounded-lg border border-zinc-200 bg-white p-6">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">Meu endereço</h2>
-                <div className="mt-4 flex flex-col gap-3">
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                    <div>
-                      <label htmlFor="cep" className={classeLabel}>
-                        CEP
-                      </label>
-                      <input
-                        id="cep"
-                        type="text"
-                        inputMode="numeric"
-                        placeholder="00000-000"
-                        value={cep}
-                        onChange={(evento) => setCep(evento.target.value)}
-                        className={classeCampo}
-                      />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label htmlFor="rua" className={classeLabel}>
-                        Rua
-                      </label>
-                      <input
-                        id="rua"
-                        type="text"
-                        value={rua}
-                        onChange={(evento) => setRua(evento.target.value)}
-                        className={classeCampo}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div>
-                      <label htmlFor="numero" className={classeLabel}>
-                        Número
-                      </label>
-                      <input
-                        id="numero"
-                        type="text"
-                        value={numero}
-                        onChange={(evento) => setNumero(evento.target.value)}
-                        className={classeCampo}
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="complemento" className={classeLabel}>
-                        Complemento
-                      </label>
-                      <input
-                        id="complemento"
-                        type="text"
-                        placeholder="Apto, bloco, ponto de referência..."
-                        value={complemento}
-                        onChange={(evento) => setComplemento(evento.target.value)}
-                        className={classeCampo}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                    <div className="sm:col-span-2">
-                      <label htmlFor="bairro" className={classeLabel}>
-                        Bairro
-                      </label>
-                      <input
-                        id="bairro"
-                        type="text"
-                        value={bairro}
-                        onChange={(evento) => setBairro(evento.target.value)}
-                        className={classeCampo}
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="uf" className={classeLabel}>
-                        Estado
-                      </label>
-                      <select id="uf" value={uf} onChange={(evento) => setUf(evento.target.value)} className={classeCampo}>
-                        <option value="">—</option>
-                        {UFS.map((sigla) => (
-                          <option key={sigla} value={sigla}>
-                            {sigla}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                  <div>
-                    <label htmlFor="cidade" className={classeLabel}>
-                      Cidade
-                    </label>
-                    <input
-                      id="cidade"
-                      type="text"
-                      value={cidade}
-                      onChange={(evento) => setCidade(evento.target.value)}
-                      className={classeCampo}
-                    />
-                  </div>
-                </div>
-              </div>
+                {erroDados && <p className="text-sm text-red-600">{erroDados}</p>}
+                {sucessoDados && <p className="text-sm text-emerald-700">{sucessoDados}</p>}
 
-              <div className="rounded-lg border border-zinc-200 bg-white p-6">
+                <button
+                  type="submit"
+                  disabled={salvandoDados}
+                  className="w-full rounded-lg bg-dourado px-6 py-3 text-sm font-semibold text-white hover:bg-marrom disabled:cursor-not-allowed disabled:bg-zinc-300 sm:w-auto"
+                >
+                  {salvandoDados ? "Salvando..." : "Salvar alterações"}
+                </button>
+              </form>
+
+              <form onSubmit={handleAlterarSenha} className="rounded-lg border border-zinc-200 bg-white p-6">
                 <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">Alterar senha</h2>
-                <p className="mt-1 text-xs text-zinc-500">Deixe em branco se não quiser trocar a senha agora.</p>
+                <p className="mt-1 text-xs text-zinc-500">Confirme sua senha atual pra definir uma nova.</p>
                 <div className="mt-4 flex flex-col gap-3">
                   <div>
                     <label htmlFor="senha-atual" className={classeLabel}>
@@ -286,6 +338,7 @@ export default function MeusDadosPage() {
                     <input
                       id="senha-atual"
                       type="password"
+                      required
                       value={senhaAtual}
                       onChange={(evento) => setSenhaAtual(evento.target.value)}
                       className={classeCampo}
@@ -299,6 +352,7 @@ export default function MeusDadosPage() {
                       <input
                         id="nova-senha"
                         type="password"
+                        required
                         value={novaSenha}
                         onChange={(evento) => setNovaSenha(evento.target.value)}
                         className={classeCampo}
@@ -311,6 +365,7 @@ export default function MeusDadosPage() {
                       <input
                         id="confirmar-nova-senha"
                         type="password"
+                        required
                         value={confirmarNovaSenha}
                         onChange={(evento) => setConfirmarNovaSenha(evento.target.value)}
                         className={classeCampo}
@@ -318,19 +373,19 @@ export default function MeusDadosPage() {
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {erro && <p className="text-sm text-red-600">{erro}</p>}
-              {sucesso && <p className="text-sm text-emerald-700">{sucesso}</p>}
+                {erroSenha && <p className="mt-3 text-sm text-red-600">{erroSenha}</p>}
+                {sucessoSenha && <p className="mt-3 text-sm text-emerald-700">{sucessoSenha}</p>}
 
-              <button
-                type="submit"
-                disabled={salvando}
-                className="w-full rounded-lg bg-dourado px-6 py-3 text-sm font-semibold text-white hover:bg-marrom disabled:cursor-not-allowed disabled:bg-zinc-300 sm:w-auto"
-              >
-                {salvando ? "Salvando..." : "Salvar alterações"}
-              </button>
-            </form>
+                <button
+                  type="submit"
+                  disabled={salvandoSenha}
+                  className="mt-4 w-full rounded-lg bg-dourado px-6 py-3 text-sm font-semibold text-white hover:bg-marrom disabled:cursor-not-allowed disabled:bg-zinc-300 sm:w-auto"
+                >
+                  {salvandoSenha ? "Alterando..." : "Alterar senha"}
+                </button>
+              </form>
+            </div>
           )}
         </div>
       </main>
