@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { buscarProdutos, type Produto } from "@/lib/api";
+import { buscarProdutos } from "@/lib/api";
 import { ITENS_NAVEGACAO } from "@/lib/navegacaoPrincipal";
 import { CartaoProduto } from "@/components/CartaoProduto";
 import { FaixaDeConfianca } from "@/components/FaixaDeConfianca";
+import { IconeMedalhao3D } from "@/components/IconeMedalhao3D";
 
 /**
  * Home: hero + navegação por categoria + uma prévia do catálogo. O
@@ -10,12 +11,11 @@ import { FaixaDeConfianca } from "@/components/FaixaDeConfianca";
  */
 export default async function Home() {
   const { produtos } = await buscarProdutos({ tipo: "cabelo", pagina: 1 });
-  const produtoDestaque = produtos[0];
   const produtosDestaque = produtos.slice(0, 4);
 
   return (
     <main className="flex flex-1 flex-col">
-      <SecaoHero produtoDestaque={produtoDestaque} />
+      <SecaoHero />
       <FaixaDeConfianca />
       <SecaoCategorias />
 
@@ -46,11 +46,15 @@ export default async function Home() {
   );
 }
 
-/** Banner escuro no topo — headline + CTA + o produto mais recente em destaque. */
-function SecaoHero({ produtoDestaque }: { produtoDestaque?: Produto }) {
+/** Banner escuro no topo — headline + CTA + a arte de marca em destaque. */
+function SecaoHero() {
   return (
     <section className="fundo-luxo">
-      <div className="mx-auto grid max-w-6xl gap-12 px-6 py-16 sm:py-20 md:grid-cols-[1fr_0.78fr] md:items-center md:py-24">
+      <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 py-16 sm:py-20 md:grid-cols-[0.7fr_0.85fr_1fr] md:gap-8 md:py-24">
+        <div className="mx-auto w-full max-w-xs md:max-w-none">
+          <IconeMedalhao3D />
+        </div>
+
         <div>
           <div className="flex items-center gap-2.5">
             <span className="h-px w-6 bg-dourado-claro" />
@@ -83,40 +87,14 @@ function SecaoHero({ produtoDestaque }: { produtoDestaque?: Produto }) {
           </div>
         </div>
 
-        {produtoDestaque && (
-          <div>
-            <div className="overflow-hidden rounded-[3px] border border-white/15">
-              {produtoDestaque.foto ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={produtoDestaque.foto}
-                  alt={produtoDestaque.nome}
-                  className="aspect-[4/5] w-full object-cover"
-                />
-              ) : (
-                <div className="flex aspect-[4/5] items-center justify-center bg-white/5 text-xs text-white/40">
-                  Sem foto
-                </div>
-              )}
-            </div>
-            <div className="mt-4 flex items-center justify-between">
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-wide text-dourado-claro">
-                  {[produtoDestaque.categoria, produtoDestaque.tom, produtoDestaque.comprimento ? `${produtoDestaque.comprimento}cm` : null]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </p>
-                <p className="mt-1 font-serif text-xl text-white">
-                  {produtoDestaque.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-                </p>
-              </div>
-              <span className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                {produtoDestaque.disponivel ? "Disponível" : "Esgotado"}
-              </span>
-            </div>
-          </div>
-        )}
+        <div className="mx-auto md:mx-0 md:ml-auto">
+          {/* eslint-disable-next-line @next/next/no-img-element -- arte estática em public/, não precisa de otimização do next/image */}
+          <img
+            src="/images/hero-home.png?v=2"
+            alt="100% Premium Brazilian Hair — Royal Brazilian Extensions"
+            className="aspect-square w-full max-w-[420px] rounded-[3px] object-contain"
+          />
+        </div>
       </div>
     </section>
   );
