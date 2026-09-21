@@ -8,6 +8,11 @@ export const metadata: Metadata = {
   title: "Laces e Perucas — Royal Brazilian Extensions",
 };
 
+// busca o catálogo a cada visita (nunca em build) — build roda sem o
+// backend PHP no ar (ex: Vercel), então pré-renderizar aqui quebraria
+// o build inteiro tentando buscar de API_BASE_URL
+export const dynamic = "force-dynamic";
+
 interface FiltrosAtuais {
   categoria?: string;
   tom?: string;

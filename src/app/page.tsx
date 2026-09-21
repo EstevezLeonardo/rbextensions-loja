@@ -5,6 +5,11 @@ import { CartaoProduto } from "@/components/CartaoProduto";
 import { FaixaDeConfianca } from "@/components/FaixaDeConfianca";
 import { IconeMedalhao3D } from "@/components/IconeMedalhao3D";
 
+// busca o catálogo a cada visita (nunca em build) — build roda sem o
+// backend PHP no ar (ex: Vercel), então pré-renderizar aqui quebraria
+// o build inteiro tentando buscar de API_BASE_URL
+export const dynamic = "force-dynamic";
+
 /**
  * Home: hero + navegação por categoria + uma prévia do catálogo. O
  * catálogo completo (filtros, busca, paginação) vive em /cabelos.

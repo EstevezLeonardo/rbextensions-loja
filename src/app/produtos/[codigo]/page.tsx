@@ -4,6 +4,11 @@ import { buscarProdutoPorCodigo } from "@/lib/api";
 import { GaleriaDeFotos } from "@/components/GaleriaDeFotos";
 import { BotaoAdicionarAoCarrinho } from "@/components/BotaoAdicionarAoCarrinho";
 
+// busca o produto a cada visita (nunca em build) — build roda sem o
+// backend PHP no ar (ex: Vercel), então pré-renderizar aqui quebraria
+// o build inteiro tentando buscar de API_BASE_URL
+export const dynamic = "force-dynamic";
+
 interface ProdutoPageProps {
   params: Promise<{ codigo: string }>;
 }
